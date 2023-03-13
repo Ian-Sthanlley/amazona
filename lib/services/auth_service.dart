@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+class AuthService extends GetxController {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late Rx<User?> _firebaseUser;
+  var verificaAuth = false.obs;
+  bool isAnonimo = false;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    _firebaseUser = Rx<User?>(_auth.currentUser);
+    _firebaseUser.bindStream(_auth.authStateChanges());
+
+    ever(_firebaseUser, _mudanca);
+  }
+
+  _mudanca(User? user) {
+    if (user != null) {
+      verificaAuth.value = true;
+      if (user.isAnonymous) {
+        isAnonimo = true;
+      } else {
+        isAnonimo = false;
+      }
+    } else {
+      verificaAuth.value = false;
+    }
+  }
+
+  User? get user => _firebaseUser.value;
+  static AuthService get to => Get.find<AuthService>();
+
+  showSnack(String erro) {
+    Get.snackbar(
+      'Ops..',
+      erro,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color.fromARGB(132, 255, 82, 82),
+    );
+  }
+
+  login(String email, String senha) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: senha);
+    } catch (erro) {
+      if (erro.toString().contains('wrong-password')) {
+        showSnack('Senha incorreta.');
+      } else if (erro.toString().contains('user-not-found')) {
+        showSnack('Credencial não registrada.');
+      } else {
+        showSnack('Erro ao tentar entrar.');
+      }
+    }
+  }
+
+  logout() async {
+    try {
+      await _auth.signOut();
+    } catch (erro) {
+      erro.printError;
+      showSnack('Erro ao tentar sair.');
+    }
+  }
+
+  anonimo() async {
+    try {
+      await _auth.signInAnonymously();
+    } catch (erro) {
+      erro.printError;
+      showSnack('Erro ao tentar entrar anônimo.');
+    }
+  }
+}
