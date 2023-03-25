@@ -1,20 +1,21 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
-
 import 'package:amazona/controller/getx_produto_controller.dart';
-import 'package:amazona/pages/add_produto_page.dart';
-import 'package:amazona/pages/produto_page.dart';
-import 'package:amazona/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:amazona/pages/anonimo/anonimo_produto_page.dart';
+import 'package:amazona/services/auth_service.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+var isAppBarTall = false.obs;
+
+class AnonimoPage extends StatefulWidget {
+  const AnonimoPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<AnonimoPage> createState() => _AnonimoPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _AnonimoPageState extends State<AnonimoPage> {
   final controller = Get.put(GetxProdutoController());
   final _isSearching = false.obs;
   final _pesquisa = TextEditingController();
@@ -86,6 +87,7 @@ class _HomePageState extends State<HomePage> {
                           child: TextField(
                             textAlignVertical: TextAlignVertical.center,
                             controller: _pesquisa,
+                            autofocus: false,
                             onChanged: (value) {
                               if (value.isNotEmpty) {
                                 _isSearching.value = true;
@@ -149,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             onTap: () {
                               Get.to(
-                                () => ProdutoPage(
+                                () => AnonimoProdutoPage(
                                   key: Key(
                                       controller.filteredProdutos[index].nome),
                                   produto: controller.filteredProdutos[index],
@@ -203,7 +205,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             onTap: () {
                               Get.to(
-                                () => ProdutoPage(
+                                () => AnonimoProdutoPage(
                                   key: Key(controller.produtos[index].nome),
                                   produto: controller.produtos[index],
                                 ),
@@ -220,94 +222,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              heroTag: null,
-              onPressed: () {},
-              child: const Icon(Icons.search),
-            ),
-            const Divider(color: Color.fromARGB(0, 255, 255, 255)),
-            FloatingActionButton.large(
-              heroTag: null,
-              onPressed: () {
-                Get.to(() => const AddProdutoPage());
-              },
-              child: const Icon(Icons.add),
-            ),
-          ],
-        ),
       ),
     );
   }
 }
-
-
-
-/*  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Amazona'),
-        actions: [
-          IconButton(
-            onPressed: () => AuthService.to.logout(),
-            icon: const Icon(Icons.logout),
-          ),
-        ],
-      ),
-      body: Consumer<ProdutoController>(
-        builder: (context, controller, child) {
-          return RefreshIndicator(
-            child: ListView.separated(
-              itemCount: controller.produtos.length,
-              itemBuilder: (BuildContext contexto, int produto) {
-                final catalogo = controller.produtos;
-                return ListTile(
-                  title: Text(catalogo[produto].nome),
-                  subtitle: Text(catalogo[produto].dataEntrada),
-                  trailing: Column(
-                    children: [
-                      Text('Valor pago: ${catalogo[produto].valorPago}'),
-                      Text('Estado: ${catalogo[produto].estado}'),
-                    ],
-                  ),
-                  onTap: () {
-                    Get.to(
-                      () => ProdutoPage(
-                        produto: catalogo[produto],
-                      ),
-                    );
-                  },
-                );
-              },
-              separatorBuilder: (_, __) => const Divider(),
-              padding: const EdgeInsets.all(16),
-            ),
-            onRefresh: () => controller.initController(),
-          );
-        },
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: null,
-            onPressed: () {},
-            child: const Icon(Icons.search),
-          ),
-          const Divider(color: Color.fromARGB(0, 255, 255, 255)),
-          FloatingActionButton.large(
-            heroTag: null,
-            onPressed: () {
-              Get.to(() => const AddProdutoPage());
-            },
-            child: const Icon(Icons.add),
-          ),
-        ],
-      ),
-    );
-  }*/

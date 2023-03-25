@@ -6,7 +6,7 @@ class AuthService extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late Rx<User?> _firebaseUser;
   var verificaAuth = false.obs;
-  bool isAnonimo = false;
+  var isAnonimo = false.obs;
 
   @override
   void onInit() {
@@ -22,9 +22,9 @@ class AuthService extends GetxController {
     if (user != null) {
       verificaAuth.value = true;
       if (user.isAnonymous) {
-        isAnonimo = true;
+        isAnonimo.value = true;
       } else {
-        isAnonimo = false;
+        isAnonimo.value = false;
       }
     } else {
       verificaAuth.value = false;
@@ -54,6 +54,24 @@ class AuthService extends GetxController {
       } else {
         showSnack('Erro ao tentar entrar.');
       }
+    }
+  }
+
+  Future<bool> loginTeste(String email, String senha) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: senha);
+      return true;
+    } catch (erro) {
+      return false;
+    }
+  }
+
+  Future<bool> criar(String email, String senha) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(email: email, password: senha);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 

@@ -1,8 +1,7 @@
+import 'package:amazona/controller/produto_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 import 'package:amazona/model/gasto_adicional.dart';
-import 'package:amazona/repositories/produtos_repository.dart';
 
 //ignore: must_be_immutable
 class EditaGastoPage extends StatefulWidget {
@@ -17,25 +16,25 @@ class EditaGastoPage extends StatefulWidget {
 }
 
 class _EditaGastoPageState extends State<EditaGastoPage> {
-  final _dataDoGasto = TextEditingController();
-  final _valorDoGasto = TextEditingController();
-  final _motivo = TextEditingController();
+  final _data = TextEditingController();
+  final _valor = TextEditingController();
+  final _descricao = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    _dataDoGasto.text = widget.gasto.dataDoGasto;
-    _valorDoGasto.text = widget.gasto.valorDoGasto;
-    _motivo.text = widget.gasto.motivo;
+    _data.text = widget.gasto.data;
+    _valor.text = widget.gasto.valor.toString();
+    _descricao.text = widget.gasto.descricao;
   }
 
   editar() {
-    Provider.of<ProdutosRepository>(context, listen: false).editaGasto(
+    ProdutoController.to.editaGasto(
       gastoAdicional: widget.gasto,
-      data: _dataDoGasto.text,
-      valor: _valorDoGasto.text,
-      motivo: _motivo.text,
+      data: _data.text,
+      valor: _valor.text as double,
+      motivo: _descricao.text,
     );
     Get.back();
     Get.snackbar(
@@ -67,7 +66,7 @@ class _EditaGastoPageState extends State<EditaGastoPage> {
               padding: const EdgeInsets.only(
                   top: 48, right: 24, left: 24, bottom: 12),
               child: TextFormField(
-                controller: _dataDoGasto,
+                controller: _data,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Dia',
@@ -84,7 +83,7 @@ class _EditaGastoPageState extends State<EditaGastoPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
               child: TextFormField(
-                controller: _valorDoGasto,
+                controller: _valor,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Valor',
@@ -101,7 +100,7 @@ class _EditaGastoPageState extends State<EditaGastoPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
               child: TextFormField(
-                controller: _motivo,
+                controller: _descricao,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Descrição',

@@ -1,10 +1,8 @@
+import 'package:amazona/controller/produto_controller.dart';
 import 'package:amazona/model/gasto_adicional.dart';
-import 'package:amazona/repositories/produtos_repository.dart';
 import 'package:flutter/material.dart';
-
 import 'package:amazona/model/produto.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
 //ignore: must_be_immutable
 class AddGastoAdicionalPage extends StatefulWidget {
@@ -20,26 +18,19 @@ class AddGastoAdicionalPage extends StatefulWidget {
 }
 
 class _AddGastoAdicionalPageState extends State<AddGastoAdicionalPage> {
-  final _dataDoGasto = TextEditingController();
-  final _valorDoGasto = TextEditingController();
-  final _motivo = TextEditingController();
+  final _valor = TextEditingController();
+  final _descricao = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   save() {
-    Provider.of<ProdutosRepository>(context, listen: false).addGasto(
-      produto: widget.produto,
-      gastosAdicionais: GastoAdicional(
-          dataDoGasto: _dataDoGasto.text,
-          valorDoGasto: _valorDoGasto.text,
-          motivo: _motivo.text),
+    ProdutoController.to.addGasto(
+      widget.produto.id as int,
+      GastoAdicional(
+          data: '',
+          valor: double.parse(_valor.text),
+          descricao: _descricao.text),
     );
     Get.back();
-    Get.snackbar(
-      'Salvo!',
-      'Gasto adicionado.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.greenAccent,
-    );
   }
 
   @override
@@ -57,24 +48,7 @@ class _AddGastoAdicionalPageState extends State<AddGastoAdicionalPage> {
               padding: const EdgeInsets.only(
                   top: 48, right: 24, left: 24, bottom: 12),
               child: TextFormField(
-                controller: _dataDoGasto,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Dia',
-                ),
-                keyboardType: TextInputType.datetime,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Informe a data do gasto';
-                  }
-                  return null;
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-              child: TextFormField(
-                controller: _valorDoGasto,
+                controller: _valor,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Valor',
@@ -91,7 +65,7 @@ class _AddGastoAdicionalPageState extends State<AddGastoAdicionalPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
               child: TextFormField(
-                controller: _motivo,
+                controller: _descricao,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Descrição',

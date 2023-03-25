@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // ignore: use_key_in_widget_constructors
-class PageInicial extends StatefulWidget {
+class InicialPage extends StatefulWidget {
   @override
-  State<PageInicial> createState() => _PageInicialState();
+  State<InicialPage> createState() => _InicialPageState();
 }
 
-class _PageInicialState extends State<PageInicial> {
+class _InicialPageState extends State<InicialPage> {
   final PageController pageController = PageController();
 
   final _email = TextEditingController();
@@ -40,16 +40,15 @@ class _PageInicialState extends State<PageInicial> {
           parent: NeverScrollableScrollPhysics(),
         ),
         children: [
-          pageInicialAnonima(),
-          pageInicialAdimin(),
+          inicialPageAnonima(),
+          inicialPageAdimin(),
         ],
       ),
     );
   }
 
-  Widget pageInicialAnonima() {
+  Widget inicialPageAnonima() {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 228, 223, 230),
       appBar: AppBar(
         backgroundColor: const Color(0x00000000),
         elevation: 0,
@@ -61,7 +60,7 @@ class _PageInicialState extends State<PageInicial> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/images/prima.png',
+                    'assets/images/AmazonasCompleto.png',
                     alignment: Alignment.topCenter,
                     width: 350,
                   ),
@@ -110,8 +109,7 @@ class _PageInicialState extends State<PageInicial> {
                                 minimumSize: Size.zero),
                             child: const Text(
                               'Administração',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.indigo),
+                              style: TextStyle(fontSize: 18),
                             ),
                           ),
                         ],
@@ -124,9 +122,8 @@ class _PageInicialState extends State<PageInicial> {
     );
   }
 
-  Widget pageInicialAdimin() {
+  Widget inicialPageAdimin() {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 228, 223, 230),
       appBar: AppBar(
         leading: ElevatedButton(
           style: ButtonStyle(
@@ -141,14 +138,13 @@ class _PageInicialState extends State<PageInicial> {
               focus.unfocus();
               await Future.delayed(const Duration(milliseconds: 200));
             }
-
             pageController.animateToPage(
               0,
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOutSine,
             );
           },
-          child: const Icon(Icons.arrow_back_ios, color: Colors.indigo),
+          child: const Icon(Icons.arrow_back_ios, color: Colors.blueGrey),
         ),
         backgroundColor: const Color(0x00000000),
         elevation: 0,
@@ -166,9 +162,9 @@ class _PageInicialState extends State<PageInicial> {
                   child: Column(
                     children: [
                       Image.asset(
-                        'assets/images/prima.png',
+                        'assets/images/AmazonasCompleto.png',
                         alignment: Alignment.topCenter,
-                        width: 350,
+                        width: 290,
                       ),
                       Container(
                         padding: const EdgeInsets.all(1),

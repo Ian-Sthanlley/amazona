@@ -1,94 +1,86 @@
-import 'dart:collection';
+import 'dart:convert';
+
 import 'package:amazona/model/gasto_adicional.dart';
 import 'package:amazona/model/produto.dart';
-import 'package:flutter/material.dart';
+import 'package:amazona/repositories/i_repository.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
-class ProdutosRepository extends ChangeNotifier {
-  final List<Produto> _produtos = [];
+class ProdutosRepository implements IRepository {
+  static ProdutosRepository get to => Get.find<ProdutosRepository>();
+  final String rede = 'http://192.168.100.2:8080';
 
-  UnmodifiableListView<Produto> get produtos => UnmodifiableListView(_produtos);
+  @override
+  Future<List<Produto>> findAllProdutos() async {
+    var url = Uri.parse('$rede/produto');
+    final response = await http.get(url);
+    final List<dynamic> responseMap =
+        jsonDecode(utf8.decode(response.bodyBytes));
 
-  void addGasto(
-      {required Produto produto, required GastoAdicional gastosAdicionais}) {
-    produto.gastosAdicionais.add(gastosAdicionais);
-    notifyListeners();
+    final lista = responseMap
+        .map<Produto>((resposta) => Produto.fromMap(resposta))
+        .toList();
+    lista.sort((Produto produtoA, Produto produtoB) =>
+        produtoB.id!.compareTo(produtoA.id as num));
+    return lista;
   }
 
-  void editaGasto(
-      {required GastoAdicional gastoAdicional,
-      required String data,
-      required String valor,
-      required String motivo}) {
-    gastoAdicional.dataDoGasto = data;
-    gastoAdicional.valorDoGasto = valor;
-    gastoAdicional.motivo = motivo;
-    notifyListeners();
+  @override
+  Future<List<Produto>> findAllVenda() async {
+    var url = Uri.parse('$rede/produto/venda');
+    final response = await http.get(url);
+    final List<dynamic> responseMap =
+        jsonDecode(utf8.decode(response.bodyBytes));
+
+    final lista = responseMap
+        .map<Produto>((resposta) => Produto.fromMap(resposta))
+        .toList();
+    lista.sort((Produto produtoA, Produto produtoB) =>
+        produtoB.id!.compareTo(produtoA.id as num));
+    return lista;
   }
 
-  ProdutosRepository() {
-    _produtos.addAll(
-      [
-        Produto(
-            codigo: 1,
-            nome: 'Fogão',
-            descricao: 'Novo',
-            valorPago: '150.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 2,
-            nome: 'Fogão DAKO',
-            descricao: 'Novo',
-            valorPago: '150.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 3,
-            nome: 'Geladeira',
-            descricao: 'Novo',
-            valorPago: '1500.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 4,
-            nome: 'Mesa de canto',
-            descricao: 'Novo',
-            valorPago: '300.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 5,
-            nome: 'Cadeira',
-            descricao: 'Novo',
-            valorPago: '750.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 6,
-            nome: 'Freezer',
-            descricao: 'Novo',
-            valorPago: '600.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 7,
-            nome: 'Freezer',
-            descricao: 'Usado',
-            valorPago: '400.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 8,
-            nome: 'Fogão',
-            descricao: 'Usado',
-            valorPago: '50.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 9,
-            nome: 'Fogão DAKO',
-            descricao: 'Usado',
-            valorPago: '60.00',
-            dataEntrada: '01/01/2020'),
-        Produto(
-            codigo: 10,
-            nome: 'Cadeira',
-            descricao: 'Usado',
-            valorPago: '450.00',
-            dataEntrada: '01/01/2020'),
-      ],
-    );
+  @override
+  Future<int> registraProduto(Produto produto) async {
+    var url = Uri.parse('$rede/produto');
+    String body = jsonEncode(produto.toMap());
+    Map<String, String> header = {
+      'Content-Type': 'application/json; charset=UTF-8'
+    };
+    final response = await http.post(url, headers: header, body: body);
+    return response.statusCode;
+  }
+
+  @override
+  Future<int> editaProduto(Produto produto) async {
+    var url = Uri.parse('$rede/produto/${produto.id}');
+    String body = jsonEncode(produto.toMap());
+    Map<String, String> header = {
+      'Content-Type': 'application/json; charset=UTF-8'
+    };
+    final response = await http.put(url, headers: header, body: body);
+    return response.statusCode;
+  }
+
+  @override
+  Future<int> addGasto(int id, GastoAdicional gastoAdicional) async {
+    var url = Uri.parse('$rede/produto/$id');
+    String body = jsonEncode(gastoAdicional.toMap());
+    Map<String, String> header = {
+      'Content-Type': 'application/json; charset=UTF-8'
+    };
+    final response = await http.post(url, headers: header, body: body);
+    return response.statusCode;
+  }
+
+  @override
+  Future<int> setVendido(int id, Produto produto) async {
+    var url = Uri.parse('$rede/produto/${produto.id}/vendido');
+    String body = jsonEncode(produto.toMap());
+    Map<String, String> header = {
+      'Content-Type': 'application/json; charset=UTF-8'
+    };
+    final response = await http.put(url, headers: header, body: body);
+    return response.statusCode;
   }
 }

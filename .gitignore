@@ -47,3 +47,5 @@ macos/Runner/GoogleService-Info.plist
 android/app/google-services.json
 macos/firebase_app_id_file.json
 ios/firebase_app_id_file.json
+teste
+lib/firebase_options.dart
