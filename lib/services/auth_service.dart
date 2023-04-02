@@ -1,3 +1,5 @@
+import 'package:amazona/repositories/dio_repository.dart';
+import 'package:amazona/widgets/verificaAuth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -46,6 +48,7 @@ class AuthService extends GetxController {
   login(String email, String senha) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: senha);
+      DioRepository.to.login();
     } catch (erro) {
       if (erro.toString().contains('wrong-password')) {
         showSnack('Senha incorreta.');
@@ -78,9 +81,10 @@ class AuthService extends GetxController {
   logout() async {
     try {
       await _auth.signOut();
+      DioRepository.to.apagaToken();
+      Get.offAll(() => const VerificaAuth());
     } catch (erro) {
-      erro.printError;
-      showSnack('Erro ao tentar sair.');
+      Get.offAll(() => const VerificaAuth());
     }
   }
 
@@ -88,8 +92,7 @@ class AuthService extends GetxController {
     try {
       await _auth.signInAnonymously();
     } catch (erro) {
-      erro.printError;
-      showSnack('Erro ao tentar entrar anônimo.');
+      showSnack('Erro ao tentar entrar.');
     }
   }
 }

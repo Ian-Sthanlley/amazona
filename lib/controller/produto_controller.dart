@@ -1,13 +1,45 @@
 import 'dart:collection';
 import 'package:amazona/model/gasto_adicional.dart';
 import 'package:amazona/model/produto.dart';
-import 'package:amazona/repositories/produtos_repository.dart';
+import 'package:amazona/repositories/dio_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProdutoController extends ChangeNotifier {
   static ProdutoController get to => Get.find<ProdutoController>();
+
   List<Produto> _produtos = [];
+
+  RxList<GastoAdicional> gasto = RxList<GastoAdicional>([]);
+
+  RxList<GastoAdicional> gastoVazio = RxList<GastoAdicional>([]);
+
+  Rx<Produto> produto = Produto(
+      nome: '',
+      descricao: '',
+      estado: '',
+      dataEntrada: '',
+      dataSaida: '',
+      anotacaoSaida: '',
+      valorPago: 0,
+      valorAvista: 0,
+      valor5Vezes: 0,
+      valor10Vezes: 0,
+      gastosAdicionais: []).obs;
+
+  Produto produtoVazio = Produto(
+      nome: '',
+      descricao: '',
+      estado: '',
+      dataEntrada: '',
+      dataSaida: '',
+      anotacaoSaida: '',
+      valorPago: 0,
+      valorAvista: 0,
+      valor5Vezes: 0,
+      valor10Vezes: 0,
+      gastosAdicionais: []);
+
   UnmodifiableListView<Produto> get produtos => UnmodifiableListView(_produtos);
 
   ProdutoController() {
@@ -26,13 +58,38 @@ class ProdutoController extends ChangeNotifier {
     notifyListeners();
   }
 
+  findProduto(int id) async {
+    try {
+      final response = await DioRepository.to.findById(id);
+      if (response.id != null) {
+        produto.value = response;
+      } else {
+        produto.value = produtoVazio;
+      }
+    } catch (e) {
+      produto.value = produtoVazio;
+    }
+  }
+
+  findGastos(int id) async {
+    try {
+      final response = await DioRepository.to.findById(id);
+      if (response.id != null) {
+        gasto.value = response.gastosAdicionais;
+      } else {
+        gasto.value = gastoVazio;
+      }
+    } catch (e) {
+      gasto.value = gastoVazio;
+    }
+  }
+
   initController() async {
-    _produtos = await ProdutosRepository.to.findAllVenda();
-    notifyListeners();
+    _produtos = await DioRepository.to.findAllVenda();
   }
 
   Future<void> cadastraProduto(Produto produto) async {
-    final int status = await ProdutosRepository.to.registraProduto(produto);
+    final int status = await DioRepository.to.registraProduto(produto);
     if (status == 201) {
       Get.snackbar(
         'Oba..',
@@ -48,12 +105,10 @@ class ProdutoController extends ChangeNotifier {
         backgroundColor: const Color.fromARGB(132, 255, 82, 82),
       );
     }
-
-    notifyListeners();
   }
 
   Future<void> editaProduto(Produto produto) async {
-    final int status = await ProdutosRepository.to.editaProduto(produto);
+    final int status = await DioRepository.to.editaProduto(produto);
     if (status == 200) {
       Get.snackbar(
         'Oba..',
@@ -69,13 +124,10 @@ class ProdutoController extends ChangeNotifier {
         backgroundColor: const Color.fromARGB(132, 255, 82, 82),
       );
     }
-    notifyListeners();
   }
 
   Future<void> setVendido(Produto produto) async {
-    final int? id = produto.id;
-    final int status = await ProdutosRepository.to.setVendido(id!, produto);
-
+    final int status = await DioRepository.to.setVendidoProduto(produto);
     if (status == 200) {
       Get.snackbar(
         'Oba..',
@@ -91,11 +143,10 @@ class ProdutoController extends ChangeNotifier {
         backgroundColor: const Color.fromARGB(132, 255, 82, 82),
       );
     }
-    notifyListeners();
   }
 
   Future<void> addGasto(int id, GastoAdicional gastoAdicional) async {
-    final int status = await ProdutosRepository.to.addGasto(id, gastoAdicional);
+    final int status = await DioRepository.to.novoGasto(id, gastoAdicional);
     if (status == 201) {
       Get.snackbar(
         'Oba..',
@@ -111,6 +162,5 @@ class ProdutoController extends ChangeNotifier {
         backgroundColor: const Color.fromARGB(132, 255, 82, 82),
       );
     }
-    notifyListeners();
   }
 }

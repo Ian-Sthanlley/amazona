@@ -1,5 +1,5 @@
 import 'package:amazona/model/produto.dart';
-import 'package:amazona/repositories/produtos_repository.dart';
+import 'package:amazona/repositories/dio_repository.dart';
 import 'package:get/get.dart';
 
 class GetxProdutoController extends GetxController {
@@ -9,7 +9,7 @@ class GetxProdutoController extends GetxController {
 
   Future<void> initController() async {
     try {
-      final response = await ProdutosRepository.to.findAllVenda();
+      final response = await DioRepository.to.findAllVenda();
       if (response.isNotEmpty) {
         produtos.value = response;
       } else {

@@ -46,7 +46,7 @@ class _AddProdutoPageState extends State<AddProdutoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Novo produto'),
+        title: Text('Novo produto'),
       ),
       body: SingleChildScrollView(
         reverse: true,
@@ -69,10 +69,19 @@ class _AddProdutoPageState extends State<AddProdutoPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   caixaText(
-                    caixaForm(
-                      'Nome',
-                      _nome,
-                      TextInputType.name,
+                    TextFormField(
+                      controller: _nome,
+                      style: const TextStyle(color: textColor),
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Nome',
+                        hintStyle: TextStyle(color: textColor),
+                      ),
+                      inputFormatters: <TextInputFormatter>[
+                        LengthLimitingTextInputFormatter(15),
+                        FilteringTextInputFormatter.singleLineFormatter
+                      ],
                     ),
                     0,
                   ),
@@ -114,6 +123,8 @@ class _AddProdutoPageState extends State<AddProdutoPage> {
                                 Expanded(
                                   child: TextFormField(
                                     controller: _descricao,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
                                     style: const TextStyle(color: textColor),
                                     decoration: const InputDecoration(
                                       border: InputBorder.none,

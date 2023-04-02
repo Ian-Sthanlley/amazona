@@ -1,8 +1,12 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, depend_on_referenced_packages
 import 'dart:async';
-import 'package:amazona/controller/getx_produto_controller.dart';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+
+import 'package:amazona/controller/getx_produto_controller.dart';
 import 'package:amazona/pages/anonimo/anonimo_produto_page.dart';
 import 'package:amazona/services/auth_service.dart';
 
@@ -19,16 +23,49 @@ class _AnonimoPageState extends State<AnonimoPage> {
   final controller = Get.put(GetxProdutoController());
   final _isSearching = false.obs;
   final _pesquisa = TextEditingController();
+  final _isLoading = false.obs;
+
+  int _currentEmojiIndex = 0;
+  final List<String> _emojis = [
+    '😀',
+    '😎',
+    '😍',
+    '🤔',
+    '🤩',
+    '❤',
+    '😁',
+    '🎉',
+    '🙌',
+    '✨',
+    '😆',
+    '🥰',
+    '🤑',
+    '😇',
+    '🤡',
+  ];
 
   Timer? _timer;
 
   @override
   void initState() {
+    _changeEmoji();
+    encheList();
     super.initState();
-    controller.initController();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
-      controller.initController();
+    _timer = Timer.periodic(const Duration(seconds: 45), (_) {
+      encheList();
     });
+  }
+
+  void _changeEmoji() {
+    setState(() {
+      _currentEmojiIndex = Random().nextInt(_emojis.length);
+    });
+  }
+
+  encheList() async {
+    _isLoading.value = true;
+    await controller.initController();
+    _isLoading.value = false;
   }
 
   @override
@@ -49,7 +86,7 @@ class _AnonimoPageState extends State<AnonimoPage> {
       child: Scaffold(
         body: RefreshIndicator(
           onRefresh: () async {
-            await controller.initController();
+            encheList();
           },
           child: CustomScrollView(
             slivers: [
@@ -131,35 +168,37 @@ class _AnonimoPageState extends State<AnonimoPage> {
               ),
               Obx(
                 () {
-                  if (_isSearching.value == true) {
+                  if (_isLoading.value == true) {
+                    return const SliverPadding(
+                      padding: EdgeInsets.all(0),
+                    );
+                  } else if (_isSearching.value == true) {
                     if (controller.filteredProdutos.isNotEmpty) {
+                      final filtrada = controller.filteredProdutos;
                       return SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           return ListTile(
-                            title:
-                                Text(controller.filteredProdutos[index].nome),
+                            title: Text(filtrada[index].nome),
                             subtitle: Text(
-                                controller.filteredProdutos[index].dataEntrada),
+                              DateFormat('dd/MM/yyyy').format(
+                                  DateTime.parse(filtrada[index].dataEntrada)),
+                            ),
                             trailing: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                    'Valor Avista: ${controller.filteredProdutos[index].valorAvista}'),
-                                Text(
-                                    'Estado: ${controller.filteredProdutos[index].estado}'),
+                                    'Valor Avista: ${filtrada[index].valorAvista}'),
+                                Text('Estado: ${filtrada[index].estado}'),
                               ],
                             ),
                             onTap: () {
                               Get.to(
-                                () => AnonimoProdutoPage(
-                                  key: Key(
-                                      controller.filteredProdutos[index].nome),
-                                  produto: controller.filteredProdutos[index],
-                                ),
+                                () =>
+                                    AnonimoProdutoPage(id: filtrada[index].id!),
                               );
                             },
                           );
-                        }, childCount: controller.filteredProdutos.length),
+                        }, childCount: filtrada.length),
                       );
                     } else {
                       return const SliverFillRemaining(
@@ -186,34 +225,55 @@ class _AnonimoPageState extends State<AnonimoPage> {
                       ),
                     );
                   } else {
+                    final lista = controller.produtos;
                     return SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          return ListTile(
-                            title: Text(controller.produtos[index].nome),
-                            subtitle: Text(controller.produtos[index].estado),
-                            trailing: SizedBox(
-                              width: 120,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      'Avista R\$ ${controller.produtos[index].valorAvista.toStringAsFixed(2)}'),
-                                ],
-                              ),
-                            ),
-                            onTap: () {
-                              Get.to(
-                                () => AnonimoProdutoPage(
-                                  key: Key(controller.produtos[index].nome),
-                                  produto: controller.produtos[index],
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 2),
+                            child: ListTile(
+                              tileColor:
+                                  const Color.fromARGB(255, 240, 241, 243),
+                              leading: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.blueGrey[50],
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 0.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(3.0),
                                 ),
-                              );
-                            },
+                                child: Opacity(
+                                  opacity: 0.5,
+                                  child: Image.asset(
+                                    'assets/images/semImagem.png',
+                                    alignment: Alignment.center,
+                                  ),
+                                ),
+                              ),
+                              title: Text(lista[index].nome),
+                              subtitle: Text(lista[index].estado),
+                              trailing: SizedBox(
+                                width: 120,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                        'Avista R\$ ${lista[index].valorAvista.toStringAsFixed(2)}'),
+                                  ],
+                                ),
+                              ),
+                              onTap: () {
+                                Get.to(() =>
+                                    AnonimoProdutoPage(id: lista[index].id!));
+                              },
+                            ),
                           );
                         },
-                        childCount: controller.produtos.length,
+                        childCount: lista.length,
                       ),
                     );
                   }
@@ -222,6 +282,24 @@ class _AnonimoPageState extends State<AnonimoPage> {
             ],
           ),
         ),
+        floatingActionButton: Obx(() {
+          if (_isLoading.value == true) {
+            return FloatingActionButton(
+              onPressed: () {},
+              child: const CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            );
+          } else {
+            return FloatingActionButton.large(
+              onPressed: _changeEmoji,
+              child: Text(
+                _emojis[_currentEmojiIndex],
+                style: const TextStyle(fontSize: 24),
+              ),
+            );
+          }
+        }),
       ),
     );
   }

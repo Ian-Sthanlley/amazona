@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:amazona/controller/getx_produto_controller.dart';
 import 'package:amazona/pages/add_produto_page.dart';
@@ -6,6 +7,8 @@ import 'package:amazona/pages/produto_page.dart';
 import 'package:amazona/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+// ignore: depend_on_referenced_packages
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,14 +22,36 @@ class _HomePageState extends State<HomePage> {
   final _isSearching = false.obs;
   final _pesquisa = TextEditingController();
 
+  final _isLoading = false.obs;
+
+  int _currentEmojiIndex = 0;
+  final List<String> _emojis = [
+    '😀',
+    '😎',
+    '😍',
+    '🤔',
+    '🤩',
+    '❤',
+    '😁',
+    '🎉',
+    '🙌',
+    '✨',
+    '😆',
+    '🥰',
+    '🤑',
+    '😇',
+    '🤡',
+  ];
+
   Timer? _timer;
 
   @override
   void initState() {
+    _changeEmoji();
+    encheList();
     super.initState();
-    controller.initController();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
-      controller.initController();
+    _timer = Timer.periodic(const Duration(seconds: 45), (_) {
+      encheList();
     });
   }
 
@@ -34,6 +59,18 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     super.dispose();
     _timer?.cancel();
+  }
+
+  encheList() async {
+    _isLoading.value = true;
+    await controller.initController();
+    _isLoading.value = false;
+  }
+
+  void _changeEmoji() {
+    setState(() {
+      _currentEmojiIndex = Random().nextInt(_emojis.length);
+    });
   }
 
   @override
@@ -46,9 +83,51 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: Scaffold(
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/amazonas.png',
+                      width: 110,
+                    ),
+                  ],
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey,
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.moving_outlined),
+                title: Text('Vendas'),
+                onTap: () {},
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              Container(
+                color: Colors.blueGrey,
+                height: 1,
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              ListTile(
+                leading: Icon(Icons.moving_outlined),
+                title: Text('Relatótio 2'),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
         body: RefreshIndicator(
           onRefresh: () async {
-            await controller.initController();
+            await encheList();
           },
           child: CustomScrollView(
             slivers: [
@@ -68,6 +147,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
                 bottom: AppBar(
+                  automaticallyImplyLeading: false,
                   elevation: 0,
                   title: Container(
                     width: double.infinity,
@@ -129,7 +209,11 @@ class _HomePageState extends State<HomePage> {
               ),
               Obx(
                 () {
-                  if (_isSearching.value == true) {
+                  if (_isLoading.value == true) {
+                    return const SliverPadding(
+                      padding: EdgeInsets.all(0),
+                    );
+                  } else if (_isSearching.value == true) {
                     if (controller.filteredProdutos.isNotEmpty) {
                       return SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
@@ -137,7 +221,10 @@ class _HomePageState extends State<HomePage> {
                             title:
                                 Text(controller.filteredProdutos[index].nome),
                             subtitle: Text(
-                                controller.filteredProdutos[index].dataEntrada),
+                              DateFormat('dd/MM/yyyy').format(DateTime.parse(
+                                  controller
+                                      .filteredProdutos[index].dataEntrada)),
+                            ),
                             trailing: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -150,9 +237,7 @@ class _HomePageState extends State<HomePage> {
                             onTap: () {
                               Get.to(
                                 () => ProdutoPage(
-                                  key: Key(
-                                      controller.filteredProdutos[index].nome),
-                                  produto: controller.filteredProdutos[index],
+                                  id: controller.filteredProdutos[index].id!,
                                 ),
                               );
                             },
@@ -187,28 +272,51 @@ class _HomePageState extends State<HomePage> {
                     return SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          return ListTile(
-                            title: Text(controller.produtos[index].nome),
-                            subtitle: Text(controller.produtos[index].estado),
-                            trailing: SizedBox(
-                              width: 120,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      'Avista R\$ ${controller.produtos[index].valorAvista.toStringAsFixed(2)}'),
-                                ],
-                              ),
-                            ),
-                            onTap: () {
-                              Get.to(
-                                () => ProdutoPage(
-                                  key: Key(controller.produtos[index].nome),
-                                  produto: controller.produtos[index],
+                          return Container(
+                            margin: const EdgeInsets.symmetric(vertical: 2),
+                            child: ListTile(
+                              tileColor:
+                                  const Color.fromARGB(255, 240, 241, 243),
+                              leading: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.blueGrey[50],
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 0.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(3.0),
                                 ),
-                              );
-                            },
+                                child: Opacity(
+                                  opacity: 0.5,
+                                  child: Image.asset(
+                                    'assets/images/semImagem.png',
+                                    alignment: Alignment.center,
+                                  ),
+                                ),
+                              ),
+                              title: Text(controller.produtos[index].nome),
+                              subtitle: Text(controller.produtos[index].estado),
+                              trailing: SizedBox(
+                                width: 120,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                        'Avista R\$ ${controller.produtos[index].valorAvista.toStringAsFixed(2)}'),
+                                  ],
+                                ),
+                              ),
+                              onTap: () {
+                                Get.to(
+                                  () => ProdutoPage(
+                                    id: controller.produtos[index].id!,
+                                  ),
+                                );
+                              },
+                            ),
                           );
                         },
                         childCount: controller.produtos.length,
@@ -220,94 +328,39 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              heroTag: null,
+        floatingActionButton: Obx(() {
+          if (_isLoading.value == true) {
+            return FloatingActionButton(
               onPressed: () {},
-              child: const Icon(Icons.search),
-            ),
-            const Divider(color: Color.fromARGB(0, 255, 255, 255)),
-            FloatingActionButton.large(
-              heroTag: null,
-              onPressed: () {
-                Get.to(() => const AddProdutoPage());
-              },
-              child: const Icon(Icons.add),
-            ),
-          ],
-        ),
+              child: const CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            );
+          } else {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: _changeEmoji,
+                  child: Text(
+                    _emojis[_currentEmojiIndex],
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                ),
+                const Divider(color: Color.fromARGB(0, 255, 255, 255)),
+                FloatingActionButton.large(
+                  heroTag: null,
+                  onPressed: () {
+                    Get.to(() => const AddProdutoPage());
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              ],
+            );
+          }
+        }),
       ),
     );
   }
 }
-
-
-
-/*  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Amazona'),
-        actions: [
-          IconButton(
-            onPressed: () => AuthService.to.logout(),
-            icon: const Icon(Icons.logout),
-          ),
-        ],
-      ),
-      body: Consumer<ProdutoController>(
-        builder: (context, controller, child) {
-          return RefreshIndicator(
-            child: ListView.separated(
-              itemCount: controller.produtos.length,
-              itemBuilder: (BuildContext contexto, int produto) {
-                final catalogo = controller.produtos;
-                return ListTile(
-                  title: Text(catalogo[produto].nome),
-                  subtitle: Text(catalogo[produto].dataEntrada),
-                  trailing: Column(
-                    children: [
-                      Text('Valor pago: ${catalogo[produto].valorPago}'),
-                      Text('Estado: ${catalogo[produto].estado}'),
-                    ],
-                  ),
-                  onTap: () {
-                    Get.to(
-                      () => ProdutoPage(
-                        produto: catalogo[produto],
-                      ),
-                    );
-                  },
-                );
-              },
-              separatorBuilder: (_, __) => const Divider(),
-              padding: const EdgeInsets.all(16),
-            ),
-            onRefresh: () => controller.initController(),
-          );
-        },
-      ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: null,
-            onPressed: () {},
-            child: const Icon(Icons.search),
-          ),
-          const Divider(color: Color.fromARGB(0, 255, 255, 255)),
-          FloatingActionButton.large(
-            heroTag: null,
-            onPressed: () {
-              Get.to(() => const AddProdutoPage());
-            },
-            child: const Icon(Icons.add),
-          ),
-        ],
-      ),
-    );
-  }*/

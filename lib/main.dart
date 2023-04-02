@@ -1,6 +1,6 @@
 import 'package:amazona/config.dart';
 import 'package:amazona/controller/produto_controller.dart';
-import 'package:amazona/widgets/verificaAuth.dart';
+import 'package:amazona/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       ),
       title: 'Amazona',
       debugShowCheckedModeBanner: false,
-      home: const VerificaAuth(),
+      home: HomePage(),
     );
   }
 }

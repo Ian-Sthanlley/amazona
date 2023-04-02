@@ -58,6 +58,7 @@ caixaForm(String nome, TextEditingController controller, TextInputType tipo) {
   return TextFormField(
     controller: controller,
     style: const TextStyle(color: textColor),
+    textCapitalization: TextCapitalization.sentences,
     decoration: InputDecoration(
       border: InputBorder.none,
       hintText: nome,

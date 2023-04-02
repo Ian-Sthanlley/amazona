@@ -51,7 +51,7 @@ class _EditaProdutoPageState extends State<EditaProdutoPage> {
         valorAvista: double.parse(_valorAvista.text),
         valor5Vezes: 0,
         valor10Vezes: 0,
-        gastosAdicionais: widget.produto.gastosAdicionais,
+        gastosAdicionais: [],
       ),
     );
 
